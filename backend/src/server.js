@@ -4,6 +4,10 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./config/swagger');
+const logger = require('./utils/logger');
+const errorHandler = require('./middleware/error.middleware');
 
 // Agents & Queues
 const jobSearchAgent = require('./agents/jobSearch.agent');
@@ -16,6 +20,16 @@ const PORT = 8000;
 
 app.use(cors());
 app.use(express.json());
+
+// Request Logging Middleware
+app.use((req, res, next) => {
+    logger.info(`${req.method} ${req.originalUrl} - ${req.ip}`);
+    next();
+});
+
+// Swagger Docs
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
 
 // Load User Profile
 let userProfile = {};
@@ -30,11 +44,28 @@ try {
 
 // Routes
 
-// 1. Search & Rank
-app.post('/api/jobs/search', async (req, res) => {
+/**
+ * @swagger
+ * /api/jobs/search:
+ *   post:
+ *     summary: Search for jobs
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               query:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: List of ranked jobs
+ */
+app.post('/api/jobs/search', async (req, res, next) => {
     const { query } = req.body;
     try {
-        console.log(`[API] Search request for: ${query}`);
+        logger.info(`[API] Search request for: ${query}`);
         
         // A. Search
         const jobs = await jobSearchAgent.search(query, { location: 'remote' });
@@ -44,8 +75,7 @@ app.post('/api/jobs/search', async (req, res) => {
         
         res.json(rankedJobs);
     } catch (error) {
-        console.error("Search error:", error);
-        res.status(500).json({ error: "Failed to search jobs" });
+        next(error); // Pass to Error Handler
     }
 });
 
@@ -87,6 +117,21 @@ app.get('/api/profile', (req, res) => {
     res.json(userProfile);
 });
 
-app.listen(PORT, () => {
-    console.log(`Backend server (Agent Architecture) running on http://localhost:${PORT}`);
+// 404 Handler
+app.use((req, res, next) => {
+    const error = new Error('Not Found');
+    error.status = 404;
+    next(error);
 });
+
+// Global Error Handler
+app.use(errorHandler);
+
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        logger.info(`Backend server (Agent Architecture) running on http://localhost:${PORT}`);
+        logger.info(`Swagger Docs available at http://localhost:${PORT}/api-docs`);
+    });
+}
+
+module.exports = app; // For testing
