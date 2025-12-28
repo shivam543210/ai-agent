@@ -1,48 +1,39 @@
+# AI Job Agent (Monorepo)
 
-# ai-job-bot
+A powerful, agentic AI job search and application assistant.
 
-A brief description of what this project does and who it's for.
+## 📂 Structure
+This project follows a monorepo structure:
+-   **`backend/`**: Express.js, Puppeteer, AI Agents.
+-   **`client/`**: React, Vite, Tailwind CSS.
 
-## Table of Contents
+## 🚀 Getting Started
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Features](#features)
-- [Contributing](#contributing)
-- [License](#license)
+### Prerequisites
+-   Node.js v18+
+-   npm
 
-## Installation
-
+### 1. Backend Setup
 ```bash
-# Clone the repository
-git clone https://github.com/username/project-name.git
-
-# Navigate to the project directory
-cd project-name
-
-# Install dependencies
-npm install # or pip install -r requirements.txt
+cd backend
+npm install
+npm start
 ```
+*Runs on http://localhost:8000*
 
-## Usage
-
-Provide examples of how to use the project.
-
+### 2. Frontend Setup
 ```bash
-# Run the application
-npm start # or python main.py
+cd client
+npm install
+npm run dev
 ```
+*Runs on http://localhost:9000*
 
-## Features
+## 🛠️ Features
+-   **Agentic Search**: Uses APIs (JSearch) instead of scraping.
+-   **Intelligent Ranking**: Scores jobs based on user profile.
+-   **Safe Apply**: Queue-based application system.
+-   **Headless Browsing**: Puppeteer fallback for complex sites.
 
-- Feature 1
-- Feature 2
-- Feature 3
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 📝 Documentation
+See `history.md` for detailed architectural changes and `project_documentation.md` for prompts/logic.
